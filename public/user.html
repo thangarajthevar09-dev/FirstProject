@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Toilet Feedback</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: #fff;
+    width: 95%;
+    max-width: 420px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    animation: fadeIn 0.6s ease;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.header h2 {
+    color: #333;
+}
+
+.header p {
+    color: #777;
+    font-size: 14px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102,126,234,0.5);
+}
+
+.stars {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.star {
+    font-size: 28px;
+    cursor: pointer;
+    color: #ccc;
+    transition: 0.3s;
+}
+
+.star.active {
+    color: gold;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 18px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.03);
+}
+
+button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
+.success {
+    display: none;
+    text-align: center;
+    color: green;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <h2>🚻 Toilet Feedback</h2>
+    <p id="location">Loading location...</p>
+</div>
+
+<form id="form">
+
+<input type="text" id="name" placeholder="Your Name (optional)">
+
+<select id="issue">
+    <option value="">Select Issue</option>
+    <option>Cleanliness Issue</option>
+    <option>Water Problem</option>
+    <option>Bad Smell</option>
+    <option>No Lighting</option>
+    <option>Maintenance Required</option>
+</select>
+
+<div class="stars">
+    <span class="star" onclick="setRating(1)">★</span>
+    <span class="star" onclick="setRating(2)">★</span>
+    <span class="star" onclick="setRating(3)">★</span>
+    <span class="star" onclick="setRating(4)">★</span>
+    <span class="star" onclick="setRating(5)">★</span>
+</div>
+
+<textarea id="feedback" rows="4" placeholder="Describe your experience..."></textarea>
+
+<button id="submitBtn" type="submit">Submit Feedback</button>
+
+<div class="success" id="successMsg">
+    ✅ Feedback submitted successfully!
+</div>
+
+</form>
+
+</div>
+
+<script>
+const BASE = window.location.origin;
+
+// QR location
+const params = new URLSearchParams(window.location.search);
+const toilet = params.get("toilet") || "Public Toilet";
+document.getElementById("location").innerText = "📍 Location: " + toilet;
+
+// Rating
+let rating = 0;
+function setRating(val) {
+    rating = val;
+    document.querySelectorAll(".star").forEach((s, i) => {
+        s.classList.toggle("active", i < val);
+    });
+}
+
+// Submit
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const issue = document.getElementById("issue").value;
+    const feedback = document.getElementById("feedback").value;
+
+    if(!issue || !feedback){
+        alert("⚠️ Please fill all required fields!");
+        return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+
+    try {
+        await fetch(BASE + "/submit-feedback", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                name: document.getElementById("name").value,
+                issue: issue,
+                feedback: feedback,
+                rating: rating,
+                location: toilet
+            })
+        });
+
+        document.getElementById("successMsg").style.display = "block";
+
+        document.getElementById("form").reset();
+        rating = 0;
+        document.querySelectorAll(".star").forEach(s => s.classList.remove("active"));
+
+    } catch(err){
+        alert("❌ Failed to submit");
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Submit Feedback";
+};
+</script>
+
+</body>
+</html>

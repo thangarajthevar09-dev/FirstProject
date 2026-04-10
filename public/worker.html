@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worker Panel</title>
+
+<style>
+body {
+    font-family:Poppins;
+    background:#eef2f7;
+    margin:0;
+}
+
+.header {
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:20px;
+}
+
+.card {
+    background:white;
+    margin:15px;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+button {
+    margin:5px;
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.complete {background:green;color:white;}
+.reject {background:red;color:white;}
+
+img {
+    margin-top:10px;
+    width:100%;
+    max-width:200px;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">👷 Worker Panel</div>
+<div id="tasks"></div>
+
+<script>
+const BASE = window.location.origin;
+const role = localStorage.getItem("workerRole");
+
+//  LOAD TASKS 
+async function load(){
+    const res = await fetch(BASE + "/tasks");
+    const data = await res.json();
+
+    let html = "";
+
+    data.forEach(t => {
+        if(t.worker && role && t.worker.toLowerCase() === role.toLowerCase()){
+
+            html += `
+            <div class="card">
+                <p><b>🆔 Task:</b> ${t.id}</p>
+                <p><b>Status:</b> ${t.status}</p>
+
+                ${t.status === "Pending" ? `
+                <input type="file" id="file${t.id}" accept="image/*" onchange="previewImage(${t.id})">
+                <div id="preview${t.id}"></div>
+                <br>
+                <button class="complete" onclick="complete(${t.id})">Complete</button>
+                <button class="reject" onclick="reject(${t.id})">Reject</button>
+                ` : ""}
+
+                ${t.image ? `
+                <p><b>📸 Uploaded:</b></p>
+                <img src="${t.image}">
+                ` : ""}
+            </div>
+            `;
+        }
+    });
+
+    document.getElementById("tasks").innerHTML = html || "<p style='text-align:center;'>No tasks assigned</p>";
+}
+
+//  COMPLETE (FINAL FIX) 
+async function complete(id){
+    const fileInput = document.getElementById("file"+id);
+
+    if(!fileInput || !fileInput.files[0]){
+        alert("⚠️ Select image first!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("image", fileInput.files[0]);
+
+    try {
+        const res = await fetch(BASE + "/complete-task", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if(res.ok){
+            alert("✅ Task Completed!");
+            load();
+        } else {
+            alert("❌ " + data.error);
+        }
+
+    } catch(err){
+        console.error(err);
+        alert("❌ Upload failed");
+    }
+}
+
+//  REJECT 
+async function reject(id){
+    await fetch(BASE + "/reject-task",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id})
+    });
+
+    alert("❌ Task Rejected");
+    load();
+}
+
+//  PREVIEW 
+function previewImage(id){
+    const file = document.getElementById("file"+id).files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+        document.getElementById("preview"+id).innerHTML = `
+            <p>📸 Selected:</p>
+            <img src="${e.target.result}" style="width:150px;border-radius:10px;">
+        `;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+
+load();
+</script>
+
+</body>
+</html>

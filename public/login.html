@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:linear-gradient(135deg,#667eea,#764ba2);
+font-family:Poppins;
+}
+
+.box {
+background:white;
+padding:25px;
+border-radius:15px;
+width:300px;
+text-align:center;
+}
+
+input {
+width:90%;
+padding:10px;
+margin:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button {
+width:100%;
+padding:10px;
+background:#667eea;
+color:white;
+border:none;
+border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2 id="title"></h2>
+
+<input id="user" placeholder="Admin/Cleaner / Plumber / Electrician">
+<input id="pass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+</div>
+
+<script>
+const role=new URLSearchParams(location.search).get("role");
+title.innerText=role.toUpperCase()+" LOGIN";
+
+function login(){
+const u=user.value;
+const p=pass.value;
+
+if(role==="admin" && u==="Admin" && p==="admin123"){
+location="admin.html";
+}
+else if(role==="worker" && p==="1234"){
+const r=u.charAt(0).toUpperCase()+u.slice(1).toLowerCase();
+localStorage.setItem("workerRole",r);
+location="worker.html";
+}
+else alert("Invalid");
+}
+</script>
+
+</body>
+</html>

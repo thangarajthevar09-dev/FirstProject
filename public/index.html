@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Toilet System</title>
+<style>
+body {
+    margin:0;
+    font-family:Poppins;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    text-align:center;
+}
+
+.container {
+    margin-top:120px;
+}
+
+button {
+    padding:15px 30px;
+    margin:15px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover {
+    transform:scale(1.05);
+}
+
+.admin {background:#fff;color:#333;}
+.worker {background:#000;color:#fff;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🚻 Smart Public Toilet System</h1>
+<p>Efficient Maintenance & Feedback System</p>
+
+<button class="admin" onclick="go('admin')">Admin</button>
+<button class="worker" onclick="go('worker')">Worker</button>
+</div>
+
+<script>
+function go(role){
+window.location=`login.html?role=${role}`;
+}
+</script>
+
+</body>
+</html>

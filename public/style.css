@@ -1,0 +1,22 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: white;
+}
+
+.box button {
+    padding: 15px;
+    margin: 10px;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+}
+
+.card {
+    background: white;
+    color: black;
+    padding: 15px;
+    margin: 10px;
+    border-radius: 10px;
+}

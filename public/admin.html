@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<style>
+body {
+    font-family:Poppins;
+    background:#f4f6f9;
+    margin:0;
+}
+
+.header {
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    padding:18px;
+    text-align:center;
+    font-size:20px;
+}
+
+.container {
+    padding:15px;
+}
+
+.card {
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+.card:hover {
+    transform:scale(1.01);
+}
+
+.status {
+    padding:5px 10px;
+    border-radius:8px;
+    font-size:12px;
+    color:white;
+}
+
+.pending {background:orange;}
+.completed {background:green;}
+.rejected {background:red;}
+
+select,button {
+    padding:8px;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+button {
+    background:#667eea;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover {
+    background:#5a67d8;
+}
+
+img {
+    margin-top:10px;
+    width:100%;
+    max-width:250px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🚻 Admin Dashboard</div>
+<div class="container" id="data"></div>
+
+<script>
+const BASE = window.location.origin;
+
+//  LOAD 
+async function load(){
+    const feedbacks = await (await fetch(BASE + "/feedbacks")).json();
+    const tasks = await (await fetch(BASE + "/tasks")).json();
+
+    let html = "";
+
+    if(feedbacks.length === 0){
+        html = "<p>No feedback available</p>";
+    }
+
+    feedbacks.forEach((f)=>{
+
+        const task = tasks.find(t => t.feedbackId === f.id);
+
+        html += `
+        <div class="card">
+
+        <h3>${f.name || "Anonymous"}</h3>
+        <p><b>📍</b> ${f.location || "Toilet"}</p>
+        <p><b>⚠️</b> ${f.issue}</p>
+        <p>${f.feedback}</p>
+
+        ${task ? `
+        <p><b>👷 Worker:</b> ${task.worker}</p>
+        <p><b>Status:</b> 
+        <span class="status ${task.status.toLowerCase()}">${task.status}</span>
+        </p>
+        ` : ""}
+
+        ${task && task.image ? `
+        <p><b>📸 Completed Work:</b></p>
+        <img src="${task.image}" onclick="window.open('${task.image}')">
+        ` : ""}
+
+        <hr>
+
+        <select id="w${f.id}">
+            <option value="">Assign Worker</option>
+            <option value="Cleaner">Cleaner</option>
+            <option value="Plumber">Plumber</option>
+            <option value="Electrician">Electrician</option>
+        </select>
+
+        <br>
+
+        <button onclick="assign(${f.id})">
+            ${task ? "Reassign" : "Assign Task"}
+        </button>
+
+        </div>
+        `;
+    });
+
+    document.getElementById("data").innerHTML = html;
+}
+
+//ASSIGN
+async function assign(feedbackId){
+    const worker = document.getElementById("w"+feedbackId).value;
+
+    if(!worker){
+        alert("⚠️ Select worker!");
+        return;
+    }
+
+    const res = await fetch(BASE + "/assign-task", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            feedbackId: feedbackId,
+            worker: worker
+        })
+    });
+
+    const result = await res.json();
+
+    alert(result.message || "Done");
+
+    load();
+}
+
+setInterval(load, 5000);
+
+load();
+</script>
+
+</body>
+</html>
