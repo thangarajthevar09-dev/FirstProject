@@ -144,6 +144,6 @@ app.post("/reject-task", (req, res) => {
 });
 
 //  START 
-app.listen(3000, '0.0.0.0', () => {
-  console.log("Server running on 0.0.0.0:3000");
+app.listen(3000, "0.0.0.0", () => {
+  console.log("Server running on port 3000");
 });
